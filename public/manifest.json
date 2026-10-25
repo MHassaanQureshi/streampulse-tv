@@ -1,0 +1,19 @@
+{
+  "name": "StreamPulse TV",
+  "short_name": "StreamPulse",
+  "description": "Smart IPTV Player tailored for Smart TVs",
+  "start_url": "/",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#06080f",
+  "theme_color": "#06080f",
+  "categories": ["entertainment", "video"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

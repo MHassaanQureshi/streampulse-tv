@@ -1,0 +1,11 @@
+{
+  "appId": "com.streampulse.tv",
+  "appName": "StreamPulse TV",
+  "webDir": "dist",
+  "android": {
+    "allowMixedContent": true
+  },
+  "server": {
+    "cleartext": true
+  }
+}
