@@ -67,14 +67,23 @@ export default function SearchModal({
                 setLocalQuery(e.target.value)
                 onSearchChange(e.target.value)
               }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault()
+                  handleDone()
+                }
+              }}
               className="tv-search-input"
               autoFocus
             />
             {localQuery && (
-              <button className="clear-search-btn-large" onClick={handleClear}>
+              <button className="clear-search-btn-large" onClick={handleClear} aria-label="Clear">
                 ×
               </button>
             )}
+            <button className="modal-search-action-btn" onClick={handleDone} aria-label="Submit Search">
+              Search
+            </button>
           </div>
 
           {/* On-Screen TV Remote Keyboard */}

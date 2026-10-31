@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import ChannelCard from './ChannelCard'
-import { Tv, RefreshCw, Search, ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react'
+import { Tv, RefreshCw, Search, ChevronLeft, ChevronRight, AlertCircle, Menu, Star, Tv2 } from 'lucide-react'
 
 const PAGE_SIZE = 20 // 20 cards in DOM = 60FPS on low-end Smart TV processors
 
@@ -22,7 +22,10 @@ const ChannelGrid = React.memo(function ChannelGrid({
   selectedCountry,
   onSelectCountry,
   currentPage = 0,
-  onPageChange
+  onPageChange,
+  onToggleSidebar,
+  onOpenSearchModal,
+  onSelectFavorites
 }) {
   const favSet = React.useMemo(() => {
     const s = new Set()
@@ -41,6 +44,48 @@ const ChannelGrid = React.memo(function ChannelGrid({
 
   return (
     <main className={`channel-grid-container ${activeZone === 'channels' ? 'zone-active' : ''}`}>
+      {/* Mobile App Header (Visible on screens <= 768px) */}
+      <div className="mobile-app-header">
+        <button
+          className="mobile-header-btn mobile-menu-trigger"
+          onClick={onToggleSidebar}
+          aria-label="Toggle categories menu"
+          title="Categories"
+        >
+          <Menu size={22} />
+        </button>
+
+        <div className="mobile-header-brand">
+          <div className="mobile-brand-icon-wrap">
+            <Tv2 size={18} />
+          </div>
+          <span className="mobile-brand-name">StreamPulse</span>
+        </div>
+
+        <div className="mobile-header-actions">
+          <button
+            className="mobile-header-btn"
+            onClick={onOpenSearchModal}
+            aria-label="Search"
+            title="Search channels"
+          >
+            <Search size={19} />
+          </button>
+          <button
+            className={`mobile-header-btn ${selectedCategory === 'favorites' ? 'active-fav' : ''}`}
+            onClick={onSelectFavorites}
+            aria-label="Favorites"
+            title="My Favorites"
+          >
+            <Star
+              size={19}
+              fill={selectedCategory === 'favorites' ? '#fbbf24' : 'none'}
+              color={selectedCategory === 'favorites' ? '#fbbf24' : 'currentColor'}
+            />
+          </button>
+        </div>
+      </div>
+
       {/* Top Banner / Filter Bar */}
       <header className="grid-header">
         <div className="header-titles">

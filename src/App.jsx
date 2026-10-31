@@ -10,6 +10,7 @@ import {
   addRecentChannel
 } from './services/storage'
 import { useTvNavigation } from './hooks/useTvNavigation'
+import { LayoutGrid, Tv, Star, Search, PlusCircle } from 'lucide-react'
 import Sidebar from './components/Sidebar'
 import ChannelGrid from './components/ChannelGrid'
 import VideoPlayer from './components/VideoPlayer'
@@ -21,6 +22,7 @@ import SearchModal from './components/SearchModal'
 export default function App() {
   // Navigation & View States
   const [activeZone, setActiveZone] = useState('channels') // 'channels', 'sidebar', 'player', 'modal'
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState('featured')
   const [selectedCountry, setSelectedCountry] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
@@ -196,6 +198,7 @@ export default function App() {
     setSearchQuery('')
     setCurrentPage(0)
     setActiveZone('channels')
+    setIsSidebarOpen(false)
   }
 
   // Country Selection
@@ -304,8 +307,8 @@ export default function App() {
 
   return (
     <div className="tv-app-shell">
-      {/* 1. Sidebar Navigation - Hidden during playback to save 100% TV GPU memory */}
-      <div style={{ display: activeChannel ? 'none' : 'flex' }}>
+      {/* 1. Sidebar Navigation - Collapsible on small screens, fixed on Smart TV/desktop */}
+      <div className={`tv-sidebar-wrapper ${activeChannel ? 'hidden' : ''}`}>
         <Sidebar
           categories={PLAYLIST_CATEGORIES}
           selectedCategory={selectedCategory}
@@ -313,27 +316,33 @@ export default function App() {
           activeZone={activeZone}
           sidebarIndex={sidebarIndex}
           favoritesCount={favorites.length}
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
           onOpenSearch={() => {
             setIsSearchOpen(true)
             setActiveZone('modal')
+            setIsSidebarOpen(false)
           }}
           onOpenCustomPlaylist={() => {
             setIsCustomPlaylistOpen(true)
             setActiveZone('modal')
+            setIsSidebarOpen(false)
           }}
           onOpenTvGuide={() => {
             setIsTvGuideOpen(true)
             setActiveZone('modal')
+            setIsSidebarOpen(false)
           }}
           onOpenSettings={() => {
             setIsTvGuideOpen(true)
             setActiveZone('modal')
+            setIsSidebarOpen(false)
           }}
         />
       </div>
 
-      {/* 2. Main Content: Channel Grid - Hidden during playback to save TV RAM & GPU fillrate */}
-      <div style={{ display: activeChannel ? 'none' : 'flex', flex: 1, height: '100vh', overflow: 'hidden' }}>
+      {/* 2. Main Content: Channel Grid */}
+      <div className={`tv-main-wrapper ${activeChannel ? 'hidden' : ''}`}>
         <ChannelGrid
           channels={filteredChannels}
           isLoading={isLoading}
@@ -359,10 +368,75 @@ export default function App() {
             setCurrentPage(p)
             setChannelIndex(0)
           }}
+          onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
+          onOpenSearchModal={() => {
+            setIsSearchOpen(true)
+            setActiveZone('modal')
+          }}
+          onSelectFavorites={() => handleSelectCategory('favorites')}
         />
       </div>
 
-      {/* 3. Fullscreen Live Video Player (Active when channel selected) */}
+      {/* 3. Mobile Bottom Navigation Bar (Visible on mobile/tablets <= 768px when player is not active) */}
+      {!activeChannel && (
+        <nav className="mobile-bottom-nav">
+          <button
+            className={`mobile-nav-item ${selectedCategory === 'featured' || selectedCategory === 'all' ? 'active' : ''}`}
+            onClick={() => handleSelectCategory('featured')}
+            aria-label="Home Live Channels"
+          >
+            <Tv size={20} />
+            <span>Live TV</span>
+          </button>
+          <button
+            className={`mobile-nav-item ${selectedCategory === 'favorites' ? 'active' : ''}`}
+            onClick={() => handleSelectCategory('favorites')}
+            aria-label="My Favorite Channels"
+          >
+            <div className="mobile-nav-badge-wrap">
+              <Star
+                size={20}
+                fill={selectedCategory === 'favorites' ? '#fbbf24' : 'none'}
+                color={selectedCategory === 'favorites' ? '#fbbf24' : 'currentColor'}
+              />
+              {favorites.length > 0 && <span className="mobile-fav-dot">{favorites.length}</span>}
+            </div>
+            <span>Favorites</span>
+          </button>
+          <button
+            className={`mobile-nav-item ${isSidebarOpen ? 'active' : ''}`}
+            onClick={() => setIsSidebarOpen(prev => !prev)}
+            aria-label="Toggle Categories Menu"
+          >
+            <LayoutGrid size={20} />
+            <span>Categories</span>
+          </button>
+          <button
+            className="mobile-nav-item"
+            onClick={() => {
+              setIsSearchOpen(true)
+              setActiveZone('modal')
+            }}
+            aria-label="Search Channels"
+          >
+            <Search size={20} />
+            <span>Search</span>
+          </button>
+          <button
+            className="mobile-nav-item"
+            onClick={() => {
+              setIsCustomPlaylistOpen(true)
+              setActiveZone('modal')
+            }}
+            aria-label="Add Custom M3U Playlist"
+          >
+            <PlusCircle size={20} />
+            <span>Add M3U</span>
+          </button>
+        </nav>
+      )}
+
+      {/* 4. Fullscreen Live Video Player (Active when channel selected) */}
       {activeChannel && (
         <VideoPlayer
           channel={activeChannel}
@@ -384,10 +458,10 @@ export default function App() {
         />
       )}
 
-      {/* 4. Interactive Virtual Smart TV Remote Simulator (PC Testing & Remote Help) */}
+      {/* 5. Interactive Virtual Smart TV Remote Simulator (PC Testing & Remote Help) */}
       <TvRemoteSimulator soundEnabled={true} />
 
-      {/* 5. Modals */}
+      {/* 6. Modals */}
       <SearchModal
         isOpen={isSearchOpen}
         onClose={() => {
